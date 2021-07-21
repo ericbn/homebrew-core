@@ -10,6 +10,8 @@ class Asdf < Formula
     sha256 cellar: :any_skip_relocation, all: "c294611358559bc924cafddd4bc8693fa5d86398366c73a3abbbbca28ffdc777"
   end
 
+  keg_only "it needs to be run from its own ASDF_DIR"
+
   depends_on "autoconf"
   depends_on "automake"
   depends_on "coreutils"
@@ -31,7 +33,15 @@ class Asdf < Formula
     touch prefix/"asdf_updates_disabled"
   end
 
+  def caveats
+    <<~EOS
+      Add the following to the ~/.bash_profile or ~/.zshrc file:
+        source #{opt_prefix}/asdf.sh
+    EOS
+  end
+
   test do
+    assert_match version.to_s, shell_output("#{bin}/asdf version")
     output = shell_output("#{bin}/asdf plugin-list 2>&1", 1)
     assert_match "No plugins installed", output
     assert_match "Update command disabled.", shell_output("#{bin}/asdf update", 42)
